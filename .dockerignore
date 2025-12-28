@@ -1,0 +1,60 @@
+# =============================================================================
+# Docker Ignore - Wikipedia Podcast Generator
+# =============================================================================
+
+# Dependencies (will be installed in container)
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Build outputs (will be built in container)
+dist/
+build/
+
+# Generated outputs
+output/
+*.mp3
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Specs (not needed in production)
+specs/
+.specify/
+
+# Test files
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+tests/
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*
+.dockerignore
+

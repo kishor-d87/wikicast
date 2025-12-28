@@ -1,0 +1,537 @@
+openapi: 3.0.3
+info:
+  title: Wikipedia Podcast Generator API
+  description: |
+    REST API for converting Wikipedia articles into conversational audio podcasts.
+    
+    This API generates podcasts featuring two AI hosts (Alex and Jordan) discussing
+    the content of a Wikipedia article in a structured, educational format.
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: http://localhost:3000
+    description: Docker container
+
+tags:
+  - name: Podcast
+    description: Podcast generation and retrieval endpoints
+
+paths:
+  /api/podcast:
+    post:
+      tags:
+        - Podcast
+      summary: Generate a podcast from a Wikipedia article
+      description: |
+        Accepts either a Wikipedia URL or article title and generates a 2-3 minute
+        conversational podcast. The generation process includes:
+        1. Fetching and cleaning the Wikipedia article
+        2. Generating a conversational script using AI
+        3. Synthesizing audio using text-to-speech
+        4. Stitching audio segments into final MP3
+        
+        This is a synchronous endpoint that returns when generation is complete.
+        For progress tracking, use the /api/podcast/stream endpoint instead.
+      operationId: generatePodcast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodcastRequest'
+            examples:
+              withUrl:
+                summary: Generate from Wikipedia URL
+                value:
+                  input: "https://en.wikipedia.org/wiki/Albert_Einstein"
+                  type: "url"
+              withTitle:
+                summary: Generate from article title
+                value:
+                  input: "Quantum Computing"
+                  type: "title"
+      responses:
+        '200':
+          description: Podcast generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodcastResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidUrl:
+                  summary: Invalid Wikipedia URL
+                  value:
+                    error: "INVALID_INPUT"
+                    message: "The provided URL is not a valid Wikipedia article URL"
+                    details:
+                      input: "https://example.com/not-wikipedia"
+                articleTooShort:
+                  summary: Article too short
+                  value:
+                    error: "ARTICLE_TOO_SHORT"
+                    message: "The article does not contain enough content to generate a podcast"
+                    details:
+                      wordCount: 150
+                      minimumRequired: 500
+        '404':
+          description: Article not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "ARTICLE_NOT_FOUND"
+                message: "Could not find a Wikipedia article matching 'Nonexistent Topic XYZ123'"
+        '500':
+          description: Generation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "GENERATION_FAILED"
+                message: "An error occurred during podcast generation"
+                details:
+                  stage: "synthesize_audio"
+        '503':
+          description: External service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "SERVICE_UNAVAILABLE"
+                message: "Wikipedia API is temporarily unavailable. Please try again later."
+
+  /api/podcast/stream:
+    post:
+      tags:
+        - Podcast
+      summary: Generate a podcast with real-time progress updates
+      description: |
+        Same as POST /api/podcast but returns Server-Sent Events (SSE) for 
+        real-time progress tracking. Each stage of the generation process
+        sends a progress event.
+      operationId: generatePodcastStream
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodcastRequest'
+      responses:
+        '200':
+          description: SSE stream of progress events followed by final result
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              examples:
+                progressEvents:
+                  summary: Example SSE stream
+                  value: |
+                    event: progress
+                    data: {"stage":"fetch","status":"in_progress","message":"Fetching Wikipedia article..."}
+                    
+                    event: progress
+                    data: {"stage":"fetch","status":"completed","message":"Article fetched successfully"}
+                    
+                    event: progress
+                    data: {"stage":"generate_script","status":"in_progress","message":"Writing script..."}
+                    
+                    event: progress
+                    data: {"stage":"generate_script","status":"completed","message":"Script generated"}
+                    
+                    event: progress
+                    data: {"stage":"synthesize_audio","status":"in_progress","message":"Generating voices..."}
+                    
+                    event: progress
+                    data: {"stage":"synthesize_audio","status":"completed","message":"Audio synthesized"}
+                    
+                    event: progress
+                    data: {"stage":"stitch_audio","status":"in_progress","message":"Finalizing podcast..."}
+                    
+                    event: complete
+                    data: {"id":"albert_einstein_20251222_143052","audioUrl":"/api/podcast/albert_einstein_20251222_143052/audio","durationSeconds":145}
+        '400':
+          description: Invalid input (sent as SSE error event)
+        '500':
+          description: Generation failed (sent as SSE error event)
+
+  /api/podcast/{id}:
+    get:
+      tags:
+        - Podcast
+      summary: Get podcast metadata
+      description: Retrieve metadata for a previously generated podcast
+      operationId: getPodcast
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Podcast ID (format: {sanitized_title}_{timestamp})
+          schema:
+            type: string
+            example: "albert_einstein_20251222_143052"
+      responses:
+        '200':
+          description: Podcast metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodcastMetadata'
+        '404':
+          description: Podcast not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/podcast/{id}/audio:
+    get:
+      tags:
+        - Podcast
+      summary: Download podcast audio
+      description: Download the generated MP3 file
+      operationId: getPodcastAudio
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Podcast ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: MP3 audio file
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: 'attachment; filename="albert_einstein_20251222_143052.mp3"'
+            Content-Length:
+              schema:
+                type: integer
+              example: 2456789
+        '404':
+          description: Audio file not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/podcast/{id}/script:
+    get:
+      tags:
+        - Podcast
+      summary: Get podcast script
+      description: Retrieve the generated conversation script
+      operationId: getPodcastScript
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Podcast ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Podcast script
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Script'
+        '404':
+          description: Script not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/health:
+    get:
+      tags:
+        - System
+      summary: Health check
+      description: Check if the API is running and all dependencies are accessible
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  schemas:
+    PodcastRequest:
+      type: object
+      required:
+        - input
+      properties:
+        input:
+          type: string
+          description: Wikipedia URL or article title
+          examples:
+            - "https://en.wikipedia.org/wiki/Albert_Einstein"
+            - "Quantum Computing"
+        type:
+          type: string
+          enum: [url, title]
+          default: url
+          description: |
+            Type of input provided. If not specified, the system will auto-detect
+            based on whether the input starts with "http".
+
+    PodcastResponse:
+      type: object
+      required:
+        - id
+        - audioUrl
+        - durationSeconds
+        - article
+      properties:
+        id:
+          type: string
+          description: Unique podcast identifier
+          example: "albert_einstein_20251222_143052"
+        audioUrl:
+          type: string
+          description: URL to download/stream the audio
+          example: "/api/podcast/albert_einstein_20251222_143052/audio"
+        scriptUrl:
+          type: string
+          description: URL to retrieve the script
+          example: "/api/podcast/albert_einstein_20251222_143052/script"
+        durationSeconds:
+          type: number
+          description: Audio duration in seconds (120-180)
+          example: 145
+        article:
+          type: object
+          required:
+            - title
+            - url
+          properties:
+            title:
+              type: string
+              example: "Albert Einstein"
+            url:
+              type: string
+              example: "https://en.wikipedia.org/wiki/Albert_Einstein"
+        speakers:
+          type: array
+          items:
+            type: string
+          example: ["Alex", "Jordan"]
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-12-22T14:30:52Z"
+
+    PodcastMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+        article:
+          type: object
+          properties:
+            title:
+              type: string
+            url:
+              type: string
+            fetchedAt:
+              type: string
+              format: date-time
+        script:
+          type: object
+          properties:
+            lineCount:
+              type: integer
+            sections:
+              type: array
+              items:
+                type: string
+            model:
+              type: string
+        audio:
+          type: object
+          properties:
+            durationSeconds:
+              type: number
+            fileSizeBytes:
+              type: integer
+            format:
+              type: string
+        voiceMapping:
+          type: object
+          properties:
+            Alex:
+              type: string
+            Jordan:
+              type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Script:
+      type: object
+      required:
+        - id
+        - lines
+      properties:
+        id:
+          type: string
+        articleTitle:
+          type: string
+        articleUrl:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScriptLine'
+        sections:
+          type: object
+          properties:
+            greeting:
+              type: array
+              items:
+                type: integer
+            explanation:
+              type: array
+              items:
+                type: integer
+            clarification:
+              type: array
+              items:
+                type: integer
+            qna:
+              type: array
+              items:
+                type: integer
+            signoff:
+              type: array
+              items:
+                type: integer
+        totalWords:
+          type: integer
+        estimatedDuration:
+          type: number
+        generatedAt:
+          type: string
+          format: date-time
+
+    ScriptLine:
+      type: object
+      required:
+        - index
+        - speaker
+        - text
+        - section
+      properties:
+        index:
+          type: integer
+          minimum: 1
+        speaker:
+          type: string
+          enum: [Alex, Jordan]
+        text:
+          type: string
+          maxLength: 1000
+        section:
+          type: string
+          enum: [greeting, explanation, clarification, qna, signoff]
+
+    ProgressEvent:
+      type: object
+      required:
+        - stage
+        - status
+      properties:
+        stage:
+          type: string
+          enum: [fetch, generate_script, synthesize_audio, stitch_audio]
+        status:
+          type: string
+          enum: [pending, in_progress, completed, failed]
+        message:
+          type: string
+          description: Human-readable status message
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Optional percentage progress within stage
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          enum:
+            - INVALID_INPUT
+            - ARTICLE_NOT_FOUND
+            - ARTICLE_TOO_SHORT
+            - UNSUPPORTED_LANGUAGE
+            - GENERATION_FAILED
+            - SERVICE_UNAVAILABLE
+            - INTERNAL_ERROR
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error context
+          additionalProperties: true
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        version:
+          type: string
+          example: "1.0.0"
+        uptime:
+          type: number
+          description: Server uptime in seconds
+        checks:
+          type: object
+          properties:
+            ffmpeg:
+              type: string
+              enum: [ok, error]
+            outputDir:
+              type: string
+              enum: [ok, error]
+
