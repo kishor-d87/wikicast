@@ -4,8 +4,138 @@ import path from 'path';
 import { generatePodcast, loadPodcast, loadScript } from '../services/podcastOrchestrator.js';
 import { validateInput } from '../utils/validation.js';
 import { AppError } from '../utils/errors.js';
+import { GenerationStage } from '../types/index.js';
 
 const router = Router();
+
+/**
+ * POST /api/podcast/stream
+ * Generate a podcast with real-time progress updates via Server-Sent Events (SSE)
+ */
+router.post('/stream', async (req: Request, res: Response) => {
+  try {
+    const { input, type } = req.body;
+    
+    // Validate input
+    const validation = validateInput(input, type);
+    if (!validation.valid) {
+      // Send error event for SSE
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      
+      res.write(`event: error\n`);
+      res.write(`data: ${JSON.stringify({ 
+        error: 'INVALID_INPUT', 
+        message: validation.error || 'Invalid input' 
+      })}\n\n`);
+      res.end();
+      return;
+    }
+    
+    // Set SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+    
+    console.log(`Streaming podcast generation for: ${input} (type: ${type || 'auto'})`);
+    
+    // Progress callback to send SSE events
+    const onProgress = (stage: GenerationStage) => {
+      const progressEvent = {
+        stage: stage.name,
+        status: stage.status,
+        message: getStageMessage(stage),
+      };
+      
+      res.write(`event: progress\n`);
+      res.write(`data: ${JSON.stringify(progressEvent)}\n\n`);
+    };
+    
+    try {
+      // Generate podcast with progress tracking
+      const podcast = await generatePodcast(input, type, onProgress);
+      
+      // Send completion event
+      const completeEvent = {
+        id: podcast.id,
+        audioUrl: `/api/podcast/${podcast.id}/audio`,
+        scriptUrl: `/api/podcast/${podcast.id}/script`,
+        durationSeconds: podcast.durationSeconds,
+        article: {
+          title: podcast.articleTitle,
+          url: podcast.articleUrl,
+        },
+        speakers: ['Nishi', 'Shyam'],
+        createdAt: podcast.createdAt,
+      };
+      
+      res.write(`event: complete\n`);
+      res.write(`data: ${JSON.stringify(completeEvent)}\n\n`);
+      res.end();
+    } catch (error) {
+      // Send error event
+      let errorCode = 'GENERATION_FAILED';
+      let errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (error instanceof AppError) {
+        errorCode = error.code;
+        errorMessage = error.message;
+      } else if (error instanceof Error) {
+        if (error.message.includes('not found') || error.message.includes('Article not found')) {
+          errorCode = 'ARTICLE_NOT_FOUND';
+        } else if (error.message.includes('too short')) {
+          errorCode = 'ARTICLE_TOO_SHORT';
+        } else if (error.message.includes('Wikipedia') || error.message.includes('unavailable')) {
+          errorCode = 'SERVICE_UNAVAILABLE';
+        }
+      }
+      
+      res.write(`event: error\n`);
+      res.write(`data: ${JSON.stringify({ error: errorCode, message: errorMessage })}\n\n`);
+      res.end();
+    }
+  } catch (error) {
+    console.error('SSE endpoint error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: 'INTERNAL_ERROR',
+        message: 'Failed to start generation stream',
+      });
+    }
+  }
+});
+
+/**
+ * Helper function to get human-readable stage messages
+ */
+function getStageMessage(stage: GenerationStage): string {
+  const messages: Record<string, Record<string, string>> = {
+    fetch: {
+      in_progress: 'Fetching Wikipedia article...',
+      completed: 'Article fetched successfully',
+      failed: 'Failed to fetch article',
+    },
+    generate_script: {
+      in_progress: 'Writing script...',
+      completed: 'Script generated',
+      failed: 'Failed to generate script',
+    },
+    synthesize_audio: {
+      in_progress: 'Generating voices...',
+      completed: 'Audio synthesized',
+      failed: 'Failed to synthesize audio',
+    },
+    stitch_audio: {
+      in_progress: 'Finalizing podcast...',
+      completed: 'Podcast complete',
+      failed: 'Failed to finalize podcast',
+    },
+  };
+  
+  return messages[stage.name]?.[stage.status] || `${stage.status}: ${stage.name}`;
+}
 
 /**
  * POST /api/podcast

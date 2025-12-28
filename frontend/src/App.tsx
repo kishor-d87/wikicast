@@ -7,11 +7,12 @@
 import { InputForm } from './components/InputForm';
 import { AudioPlayer } from './components/AudioPlayer';
 import { DownloadButton } from './components/DownloadButton';
+import { ProgressTracker } from './components/ProgressTracker';
 import { usePodcastGeneration } from './hooks/usePodcastGeneration';
 import { getAudioUrl } from './services/api';
 
 function App() {
-  const { state, result, error, generate, reset, isLoading, isSuccess, isError } = usePodcastGeneration();
+  const { state, result, error, progress, generate, reset, isLoading, isSuccess, isError } = usePodcastGeneration();
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
@@ -85,19 +86,13 @@ function App() {
           </div>
         )}
 
-        {/* Loading State */}
+        {/* Loading State with Progress Tracker */}
         {isLoading && (
-          <div className="bg-slate-800/50 rounded-2xl border border-slate-700/50 p-12 backdrop-blur-sm">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-podcast-500 mb-4"></div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Generating Your Podcast
-              </h3>
-              <p className="text-slate-400">
-                This may take 1-2 minutes. We're fetching the article, writing the script, and generating the audio...
-              </p>
-            </div>
-          </div>
+          <ProgressTracker 
+            currentStage={progress.stage}
+            currentStatus={progress.status}
+            error={error}
+          />
         )}
 
         {/* Success State - Show Player and Download */}

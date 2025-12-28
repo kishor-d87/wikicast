@@ -194,30 +194,30 @@
 
 ### Backend Enhancements for US3
 
-- [ ] T040 [US3] Implement SSE endpoint POST /api/podcast/stream in `backend/src/routes/podcast.ts`
+- [x] T040 [US3] Implement SSE endpoint POST /api/podcast/stream in `backend/src/routes/podcast.ts`
   - Set SSE headers (text/event-stream)
   - Emit progress events per stage
   - Emit complete event with result
   - Emit error event on failure
 
-- [ ] T041 [US3] Update podcastOrchestrator to accept progress callback
+- [x] T041 [US3] Update podcastOrchestrator to accept progress callback
   - Callback invoked at each stage transition
   - Pass stage name and status
 
 ### Frontend Components for US3
 
-- [ ] T042 [US3] Create ProgressTracker component in `frontend/src/components/ProgressTracker.tsx`
+- [x] T042 [US3] Create ProgressTracker component in `frontend/src/components/ProgressTracker.tsx`
   - Display 4 stages: Fetching → Writing → Generating → Complete
   - Visual indicators (spinner, checkmark, current highlight)
   - Stage-specific messages
 
-- [ ] T043 [US3] Update usePodcastGeneration hook to use SSE
+- [x] T043 [US3] Update usePodcastGeneration hook to use SSE
   - Connect to /api/podcast/stream
   - Parse SSE events
   - Update progress state
   - Handle complete/error events
 
-- [ ] T044 [US3] Wire ProgressTracker into App.tsx
+- [x] T044 [US3] Wire ProgressTracker into App.tsx
   - Show during generation
   - Hide on complete/error
 
