@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WikiCast - Wikipedia Podcast Generator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "card-dark": "#1c1f27",
+                        "border-dark": "#282e39",
+                        "text-secondary": "#9da6b9"
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #101622;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #282e39;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b4354;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-x-hidden antialiased selection:bg-primary selection:text-white">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<header class="w-full border-b border-solid dark:border-border-dark border-slate-200 sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="layout-container flex justify-center w-full">
+<div class="flex max-w-[960px] flex-1 items-center justify-between px-4 py-3 sm:px-10">
+<a class="flex items-center gap-2 group" href="#">
+<div class="size-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-200">
+<span class="material-symbols-outlined text-xl">graphic_eq</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">WikiCast</h2>
+</a>
+</div>
+</div>
+</header>
+<main class="flex flex-col items-center w-full">
+<div class="w-full flex justify-center py-10 sm:py-20 px-4">
+<div class="flex flex-col max-w-[960px] flex-1 gap-12">
+<div class="@container">
+<div class="flex min-h-[400px] sm:min-h-[500px] flex-col gap-8 rounded-xl relative overflow-hidden items-center justify-center p-6 text-center shadow-2xl shadow-black/50 border border-slate-200 dark:border-border-dark bg-slate-900">
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent z-10"></div>
+<div class="w-full h-full bg-cover bg-center opacity-40 mix-blend-overlay" data-alt="Abstract digital waveforms representing audio technology" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBix-E1FOw7f1XlMNSVNSR-G40hq3WSC4Z64VmiAfime0t746Y0mvppAQk773aA-wmgMxTjSFuP3inDpUBWA8BuHlFPqjGbffBYGQo59uBSSLhZTK0_vQu1Us6MT1Kn8PrbtE0ISunkfxQviN-VKelkNFDNbiSaRtMFtHVKI7lH90P8xoPRxNc9M_MOu0Yb4kWSzl71sX8erxK_gwKUu6ft4-87gExHEYGJCoNNpRlbTFnWpq5b-st4jMgFic5yuV87babowMfSKn0");'>
+</div>
+</div>
+<div class="flex flex-col gap-4 z-20 max-w-[720px]">
+<div class="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-md mx-auto mb-2">
+<span class="material-symbols-outlined text-primary text-sm">auto_awesome</span>
+<span class="text-xs font-medium text-white tracking-wide uppercase">AI-Powered Audio Generation</span>
+</div>
+<h1 class="text-white text-4xl sm:text-5xl md:text-6xl font-black leading-[1.1] tracking-tight">
+                                    Turn Wikipedia into Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-300">Morning Commute</span>
+</h1>
+<h2 class="text-slate-300 text-base sm:text-lg font-normal leading-relaxed max-w-[500px] mx-auto">
+                                    Instant audio podcasts generated from any article. Listen to history, science, and culture on the go.
+                                </h2>
+</div>
+<label class="flex flex-col h-14 w-full max-w-[580px] z-20 shadow-xl shadow-primary/10">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full overflow-hidden focus-within:ring-2 ring-primary transition-all duration-200">
+<div class="text-slate-400 flex border border-r-0 border-slate-700 bg-card-dark items-center justify-center pl-4 rounded-l-lg">
+<span class="material-symbols-outlined">link</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 resize-none bg-card-dark text-white border-y border-slate-700 focus:outline-0 focus:ring-0 placeholder:text-slate-500 px-3 py-2 text-base font-normal leading-normal border-x-0" placeholder="Paste Wikipedia Article URL here..." value=""/>
+<div class="flex items-center justify-center rounded-r-lg border border-l-0 border-slate-700 bg-card-dark pr-2">
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center rounded-md h-10 px-5 bg-primary hover:bg-blue-600 transition-colors text-white text-sm font-bold leading-normal tracking-wide">
+<span class="truncate">Generate</span>
+<span class="material-symbols-outlined text-lg ml-2">graphic_eq</span>
+</button>
+</div>
+</div>
+</label>
+</div>
+</div>
+</div>
+</div>
+<div class="w-full flex justify-center px-4 py-10 bg-slate-50 dark:bg-background-dark border-y border-slate-200 dark:border-border-dark">
+<div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+<div class="flex flex-col gap-10 px-0 sm:px-4 py-6">
+<div class="flex flex-col gap-4 text-center sm:text-left">
+<h2 class="text-slate-900 dark:text-white text-3xl font-bold leading-tight tracking-tight">
+                                How It Works
+                            </h2>
+<p class="text-slate-600 dark:text-text-secondary text-base font-normal leading-normal max-w-[720px]">
+                                Three simple steps to transform text into high-quality audio.
+                            </p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+<div class="group flex flex-1 gap-4 rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-card-dark p-6 flex-col hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+<div class="size-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2 group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-3xl">library_books</span>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">1. Select Topic</h3>
+<p class="text-slate-600 dark:text-text-secondary text-sm font-normal leading-relaxed">Choose any article from Wikipedia's vast library. Just copy the URL from your browser.</p>
+</div>
+</div>
+<div class="group flex flex-1 gap-4 rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-card-dark p-6 flex-col hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+<div class="size-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2 group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-3xl">auto_awesome</span>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">2. AI Conversion</h3>
+<p class="text-slate-600 dark:text-text-secondary text-sm font-normal leading-relaxed">Our advanced AI engine analyzes the content and transforms text into natural-sounding speech.</p>
+</div>
+</div>
+<div class="group flex flex-1 gap-4 rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-card-dark p-6 flex-col hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+<div class="size-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2 group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-3xl">headphones</span>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">3. Listen Anywhere</h3>
+<p class="text-slate-600 dark:text-text-secondary text-sm font-normal leading-relaxed">Stream instantly in the browser or download the MP3 file for your offline commute.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<footer class="w-full border-t border-slate-200 dark:border-border-dark mt-auto py-8 bg-slate-100 dark:bg-[#0c1018]">
+<div class="layout-container flex justify-center w-full px-4">
+<div class="flex flex-col md:flex-row max-w-[960px] flex-1 items-center justify-between gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">graphic_eq</span>
+<span class="text-slate-500 dark:text-text-secondary text-sm">© 2023 WikiCast. Built for curious minds.</span>
+</div>
+<div class="flex gap-6">
+<a class="text-slate-500 dark:text-text-secondary hover:text-primary text-sm transition-colors" href="#">Terms</a>
+<a class="text-slate-500 dark:text-text-secondary hover:text-primary text-sm transition-colors" href="#">Privacy</a>
+<a class="text-slate-500 dark:text-text-secondary hover:text-primary text-sm transition-colors" href="#">GitHub</a>
+</div>
+</div>
+</div>
+</footer>
+</main>
+</div>
+
+</body></html>

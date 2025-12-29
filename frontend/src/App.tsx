@@ -54,7 +54,7 @@ function App() {
           </h2>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
             Enter a Wikipedia article and get a 2-3 minute conversational podcast 
-            with Alex and Jordan discussing the key facts.
+            with Nishi and Shyam discussing the key facts.
           </p>
         </div>
 
@@ -158,7 +158,7 @@ function App() {
           <FeatureCard 
             icon="🎭"
             title="Two Hosts"
-            description="Alex and Jordan discuss topics in an engaging conversational format"
+            description="Nishi and Shyam discuss topics in an engaging conversational format"
           />
           <FeatureCard 
             icon="⏱️"

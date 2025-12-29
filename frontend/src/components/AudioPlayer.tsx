@@ -155,7 +155,7 @@ export function AudioPlayer({ audioUrl, title }: AudioPlayerProps) {
 
         {/* Speakers Badge */}
         <div className="flex items-center space-x-1 text-sm text-gray-600">
-          <span className="font-medium">Alex & Jordan</span>
+          <span className="font-medium">Nishi & Shyam</span>
         </div>
       </div>
     </div>
