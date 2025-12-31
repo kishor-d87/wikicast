@@ -13,28 +13,6 @@ Transform Wikipedia articles into engaging 2-3 minute audio podcasts featuring c
 
 ## 🚀 Quick Start
 
-### Using Docker (Recommended)
-
-```bash
-# Clone and configure
-git clone <repository-url>
-cd audio_pod
-cp env.example .env
-
-# Add your API keys to .env
-XAI_API_KEY=your-xai-key-here
-ELEVENLABS_API_KEY=your-elevenlabs-key-here
-
-# Build and run
-docker build -t wiki-podcast-generator .
-docker run -d -p 3000:3000 --env-file .env \
-  -v $(pwd)/output:/app/output \
-  --name wiki-podcast wiki-podcast-generator
-
-# Access the app
-open http://localhost:3000
-```
-
 ### Local Development
 
 ```bash
@@ -57,7 +35,6 @@ cd frontend && npm run dev   # Terminal 2: Frontend (port 5173)
 
 ## 📋 Prerequisites
 
-- **Docker** 24.x+ (for Docker deployment)
 - **Node.js** 20 LTS (for local development)
 - **xAI API Key** - Get from [x.ai](https://x.ai)
 - **ElevenLabs API Key** - Get from [elevenlabs.io](https://elevenlabs.io)
@@ -139,7 +116,6 @@ audio_pod/
 1. Navigate to `http://localhost:3000`
 2. Enter a Wikipedia URL or article title:
    - **URL**: `https://en.wikipedia.org/wiki/Quantum_Computing`
-   - **Title**: `Albert Einstein`
 3. Click **Generate Podcast**
 4. Watch progress through 4 stages
 5. Play in browser or download MP3
@@ -209,13 +185,7 @@ cat .env | grep API_KEY
 
 **"Article not found"**
 - Ensure URL is from `en.wikipedia.org` (English Wikipedia only)
-- Verify article title spelling
 - Check article exists by visiting URL in browser
-
-**Generation timeout**
-- Normal generation time: 30-90 seconds
-- Check backend logs: `docker logs wiki-podcast`
-- Verify stable internet connection
 
 ### Health Check
 
@@ -258,58 +228,6 @@ npm run typecheck
 # Linting
 npm run lint
 ```
-
-## 🚢 Production Deployment
-
-### Docker Deployment
-
-```bash
-# Build production image
-docker build -t wiki-podcast-generator:latest .
-
-# Run with production settings
-docker run -d \
-  --name wiki-podcast-prod \
-  -p 80:3000 \
-  -e NODE_ENV=production \
-  -e XAI_API_KEY=${XAI_API_KEY} \
-  -e ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY} \
-  -v /var/podcast/output:/app/output \
-  --restart unless-stopped \
-  wiki-podcast-generator:latest
-```
-
-### Security Considerations
-
-⚠️ **Important**: Before deploying to production:
-- Add authentication/authorization
-- Enable HTTPS/TLS
-- Configure rate limiting
-- Set up API key rotation
-- Implement logging and monitoring
-- Add input sanitization
-- Configure CORS properly
-
-## 📈 Performance
-
-- **Generation Time**: 30-90 seconds average
-- **Container Startup**: < 30 seconds
-- **Audio Quality**: 128kbps MP3, 44.1kHz
-- **Supported Scale**: Single-user MVP (no concurrent optimization)
-
-## 🤝 Contributing
-
-This is an MVP/demo application. For production use:
-1. Add authentication system
-2. Implement concurrent generation handling
-3. Add CDN for audio file serving
-4. Set up database for metadata storage
-5. Add comprehensive error tracking
-6. Implement automated testing suite
-
-## 📄 License
-
-[Add your license here]
 
 ## 🙏 Acknowledgments
 
